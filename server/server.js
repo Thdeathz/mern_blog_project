@@ -2,6 +2,7 @@ import express from 'express'
 import bodyParser from 'body-parser'
 import mongoose from 'mongoose'
 import cors from 'cors'
+import cookieParser from 'cookie-parser'
 import dotenv from 'dotenv'
 import multer from 'multer'
 import helmet from 'helmet'
@@ -10,8 +11,10 @@ import connectDB from './config/dbconnect.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import authRoutes from './routes/auth.js'
+import refreshRoutes from './routes/refresh.js'
 import userRoutes from './routes/users.js'
 import postRoutes from './routes/posts.js'
+import { verifyToken } from './middleware/verifyJWT.js'
 // import User from './models/User.js'
 // import Post from './models/Post.js'
 // import { users, posts } from './data/index.js'
@@ -30,6 +33,9 @@ connectDB()
 
 // build-in middleware for json
 app.use(express.json())
+
+// middleware for cookies
+app.use(cookieParser())
 
 app.use(helmet())
 app.use(
@@ -58,6 +64,9 @@ const upload = multer({ storage })
 
 /* ROUTES */
 app.use('/auth', authRoutes)
+app.use('/refresh', refreshRoutes)
+
+app.use(verifyToken)
 app.use('/users', userRoutes)
 app.use('/posts', postRoutes)
 
