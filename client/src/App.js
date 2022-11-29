@@ -1,15 +1,15 @@
 import React, { useMemo } from 'react'
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import { HomePage, LoginPage, ProfilePage, RegisterPage } from './pages'
 import { CssBaseline, ThemeProvider } from '@mui/material'
 import { createTheme } from '@mui/material/styles'
 import { themeSettings } from './app/theme'
+import { PersistLogin, RequireAuth } from './components'
 
 function App() {
-  const mode = useSelector(state => state.mode)
+  const mode = useSelector(state => state.user.mode)
   const theme = useMemo(() => createTheme(themeSettings(mode)), [mode])
-  const isAuth = Boolean(useSelector(state => state.token))
 
   return (
     <BrowserRouter>
@@ -18,11 +18,14 @@ function App() {
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
-          <Route path="/" element={isAuth ? <HomePage /> : <Navigate to="/login" />} />
-          <Route
-            path="/profile/:userId"
-            element={isAuth ? <ProfilePage /> : <Navigate to="/login" />}
-          />
+
+          {/* PROTECTED ROUTES */}
+          <Route element={<PersistLogin />}>
+            <Route element={<RequireAuth />}>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/profile/:userId" element={<ProfilePage />} />
+            </Route>
+          </Route>
         </Routes>
       </ThemeProvider>
     </BrowserRouter>

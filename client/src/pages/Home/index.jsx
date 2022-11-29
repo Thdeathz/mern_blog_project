@@ -3,10 +3,11 @@ import { useSelector } from 'react-redux'
 import { Box, useMediaQuery } from '@mui/material'
 import Navbar from '../Navbar'
 import { AdvertWidget, FriendListWidget, MyPostWidget, PostsWidget, UserWidget } from '../Widgets'
+import { selectCurrentUser } from '~/redux/authSlice'
 
 const HomePage = () => {
   const isNonMobileScreens = useMediaQuery('(min-width:1000px)')
-  const { _id, picturePath } = useSelector(state => state.user)
+  const { _id, picturePath } = useSelector(selectCurrentUser)
 
   useEffect(() => {
     document.title = 'Thdeathz'
@@ -30,7 +31,7 @@ const HomePage = () => {
           mt={isNonMobileScreens ? undefined : '2rem'}
         >
           <MyPostWidget picturePath={picturePath} />
-          <PostsWidget userId={_id} />
+          {/* <PostsWidget userId={_id} /> */}
         </Box>
         {isNonMobileScreens && (
           <Box flexBasis="26%">

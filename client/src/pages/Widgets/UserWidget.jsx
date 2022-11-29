@@ -10,13 +10,14 @@ import { UserImage, FlexBetween, WidgetWrapper } from '~/components'
 import { useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import images from '~/assets'
+import { selectCurrentToken } from '~/redux/authSlice'
 
 // eslint-disable-next-line react/prop-types
 const UserWidget = ({ userId, picturePath }) => {
   const [user, setUser] = useState(null)
   const { palette } = useTheme()
   const navigate = useNavigate()
-  const token = useSelector(state => state.token)
+  const token = useSelector(selectCurrentToken)
   const dark = palette.neutral.dark
   const medium = palette.neutral.medium
   const main = palette.neutral.main

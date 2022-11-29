@@ -2,13 +2,14 @@ import { Box, useMediaQuery } from '@mui/material'
 import React, { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { useParams } from 'react-router-dom'
+import { selectCurrentToken } from '~/redux/authSlice'
 import Navbar from '../Navbar'
 import { FriendListWidget, MyPostWidget, PostsWidget, UserWidget } from '../Widgets'
 
 const ProfilePage = () => {
   const [user, setUser] = useState(null)
   const { userId } = useParams()
-  const token = useSelector(state => state.token)
+  const token = useSelector(selectCurrentToken)
   const isNonMobileScreens = useMediaQuery('(min-width:1000px)')
 
   useEffect(() => {
