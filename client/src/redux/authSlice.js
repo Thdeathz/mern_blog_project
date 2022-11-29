@@ -1,48 +1,47 @@
 import { createSlice } from '@reduxjs/toolkit'
+import { apiSlice } from '~/api/apiSlice'
 
-const initialState = {
-  mode: 'light',
-  user: null,
-  token: null,
-  posts: []
-}
-
-export const authSlice = createSlice({
+const authSlice = createSlice({
   name: 'auth',
-  initialState,
+  initialState: { user: null, token: null },
   reducers: {
-    setMode: state => {
-      state.mode = state.mode === 'light' ? 'dark' : 'light'
-    },
-    setLogin: (state, action) => {
+    setCredentials: (state, action) => {
       const { user, token } = action.payload
       state.user = user
       state.token = token
     },
-    setLogout: state => {
+    logout: (state, action) => {
       state.user = null
       state.token = null
-      state.posts = []
-    },
-    setFriends: (state, action) => {
-      if (state.user) {
-        state.user.friends = action.payload.friends
-      } else {
-        console.error('User friend non-existent')
-      }
-    },
-    setPosts: (state, action) => {
-      state.posts = action.payload.posts
-    },
-    setPost: (state, action) => {
-      const updatedPosts = state.posts.map(post => {
-        if (post._id === action.payload.post._id) return action.payload.post
-        return post
-      })
-      state.posts = updatedPosts
     }
   }
 })
 
-export const { setMode, setLogin, setLogout, setFriends, setPosts, setPost } = authSlice.actions
+export const authApiSlice = apiSlice.injectEndpoints({
+  endpoints: builder => ({
+    login: builder.mutation({
+      query: credentials => ({
+        url: '/auth/login',
+        method: 'POST',
+        body: { ...credentials }
+      })
+    }),
+    refresh: builder.mutation({
+      query: () => ({
+        url: '/refresh',
+        method: 'GET'
+      })
+    })
+  })
+})
+
+// RTK api call
+export const { useLoginMutation, useRefreshMutation } = authApiSlice
+
+export const { setCredentials, logout } = authSlice.actions
+
 export default authSlice.reducer
+
+// Selector
+export const selectCurrentUser = state => state.auth.user
+export const selectCurrentToken = state => state.auth.token

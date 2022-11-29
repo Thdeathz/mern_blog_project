@@ -22,14 +22,15 @@ import {
   Menu,
   Close
 } from '@mui/icons-material'
-import { setLogout, setMode } from '~/redux/authSlice'
+import { setLogout, setMode } from '~/redux/userSlice'
 import { FlexBetween } from '~/components'
+import { selectCurrentUser } from '~/redux/authSlice'
 
 const Navbar = () => {
   const [isMobileMenuToggled, SetIsMobileMenuToggled] = useState(false)
   const dispatch = useDispatch()
   const navigate = useNavigate()
-  const user = useSelector(state => state.user)
+  const user = useSelector(selectCurrentUser)
 
   const isNonMobileScreens = useMediaQuery('(min-width: 1000px)')
 

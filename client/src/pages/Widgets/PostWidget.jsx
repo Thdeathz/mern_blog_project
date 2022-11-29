@@ -10,7 +10,8 @@ import React, { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { FlexBetween, WidgetWrapper } from '~/components'
 import Friend from '~/components/Friend'
-import { setPost } from '~/redux/authSlice'
+import { selectCurrentToken, selectCurrentUser } from '~/redux/authSlice'
+import { setPost } from '~/redux/userSlice'
 
 const PostWidget = ({
   postId,
@@ -25,8 +26,8 @@ const PostWidget = ({
 }) => {
   const dispatch = useDispatch()
   const [isComment, setIsComment] = useState(false)
-  const token = useSelector(state => state.token)
-  const loggedInUserId = useSelector(state => state.user._id)
+  const token = useSelector(selectCurrentToken)
+  const { loggedInUserId: _id } = useSelector(selectCurrentUser)
   const isLiked = likes[loggedInUserId]
   const likeCount = Object.keys(likes).length
 

@@ -8,11 +8,12 @@ export const refreshToken = async (req, res) => {
   const refreshToken = cookies.jwt
   res.clearCookie('jwt', {
     httpOnly: true,
-    sameSite: 'None'
-    // secure: true
+    sameSite: 'None',
+    secure: true
   })
 
   const user = await User.findOne({ refreshToken }).exec()
+  console.log(user)
   // Detected refresh token reuse
   if (!user) {
     jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, async (err, decoded) => {
@@ -60,10 +61,23 @@ export const refreshToken = async (req, res) => {
     res.cookie('jwt', newRefreshToken, {
       httpOnly: true,
       sameSite: 'None',
-      // secure: true,
+      secure: true,
       maxAge: 24 * 60 * 60 * 1000
     })
 
-    return res.status(200).json({ token: accessToken })
+    return res.status(200).json({
+      token: accessToken,
+      user: {
+        _id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        picturePath: user.picturePath,
+        friends: user.friends,
+        location: user.location,
+        occupation: user.occupation,
+        viewedProfile: user.viewedProfile,
+        impressions: user.impressions
+      }
+    })
   })
 }

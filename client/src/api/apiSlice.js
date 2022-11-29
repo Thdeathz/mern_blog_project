@@ -1,10 +1,11 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
-import { buildQueries } from '@testing-library/react'
 
 const baseQuery = fetchBaseQuery({
   baseUrl: 'http://127.0.0.1:3500',
-  prepareHeaders: headers => {
-    const token = null
+  credentials: 'include',
+  keepUnusedDataFor: '30s',
+  prepareHeaders: (headers, { getState }) => {
+    const token = getState().auth.token
     if (token) {
       headers.set('Authorization', 'Bearer ' + token)
     }
@@ -12,9 +13,33 @@ const baseQuery = fetchBaseQuery({
   }
 })
 
+const baseQueryWithReauth = async (args, api, extraOptions) => {
+  let result = await baseQuery(args, api, extraOptions)
+
+  if (result?.error?.originalStatus === 403) {
+    // get new refresh token
+    const refreshResult = await baseQuery('/refresh', api, extraOptions)
+    if (refreshResult) {
+      // store new access token
+      api.dispatch(
+        setCredentials({
+          token: refreshResult.token,
+          user: refreshResult.user
+        })
+      )
+      // retry query with new access token
+      result = await baseQuery(args, api, extraOptions)
+    } else {
+      api.dispatch(logout())
+    }
+  }
+
+  return result
+}
+
 export const apiSlice = createApi({
   reducerPath: 'api',
-  baseQuery: baseQuery,
-  tagTypes: [],
+  baseQuery: baseQueryWithReauth,
+  tagTypes: ['Auth'],
   endpoints: builder => ({})
 })

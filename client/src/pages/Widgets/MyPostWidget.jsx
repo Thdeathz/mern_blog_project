@@ -21,7 +21,8 @@ import {
   MicOutlined,
   MoreHorizOutlined
 } from '@mui/icons-material'
-import { setPosts } from '~/redux/authSlice'
+import { setPosts } from '~/redux/userSlice'
+import { selectCurrentToken, selectCurrentUser } from '~/redux/authSlice'
 
 // eslint-disable-next-line react/prop-types
 const MyPostWidget = ({ picturePath }) => {
@@ -30,8 +31,8 @@ const MyPostWidget = ({ picturePath }) => {
   const [image, setImage] = useState(null)
   const [post, setPost] = useState('')
   const { palette } = useTheme()
-  const { _id } = useSelector(state => state.user)
-  const token = useSelector(state => state.token)
+  const { _id } = useSelector(selectCurrentUser)
+  const token = useSelector(selectCurrentToken)
   const isNonMoblieScreens = useMediaQuery('(min-width:1000px)')
 
   const mediumMain = palette.neutral.mediumMain

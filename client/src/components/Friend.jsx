@@ -2,18 +2,18 @@ import { Box, IconButton, Typography, useTheme } from '@mui/material'
 import React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
-import { setFriends } from '~/redux/authSlice'
+import { setFriends } from '~/redux/userSlice'
 import UserImage from './UserImage'
 import FlexBetween from './FlexBetween'
 import { PersonAddOutlined, PersonRemoveOutlined } from '@mui/icons-material'
+import { selectCurrentToken, selectCurrentUser } from '~/redux/authSlice'
 
 // eslint-disable-next-line react/prop-types
 const Friend = ({ friendId, name, subtitle, userPicturePath }) => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
-  const { _id } = useSelector(state => state.user)
-  const token = useSelector(state => state.token)
-  const friends = useSelector(state => state.user.friends)
+  const { _id, friends } = useSelector(selectCurrentUser)
+  const token = useSelector(selectCurrentToken)
 
   const { palette } = useTheme()
   const primaryLight = palette.primary.light

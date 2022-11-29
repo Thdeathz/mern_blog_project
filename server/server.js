@@ -15,6 +15,8 @@ import refreshRoutes from './routes/refresh.js'
 import userRoutes from './routes/users.js'
 import postRoutes from './routes/posts.js'
 import { verifyToken } from './middleware/verifyJWT.js'
+import corsOptions from './config/corsOptions.js'
+import credentials from './middleware/credentials.js'
 // import User from './models/User.js'
 // import Post from './models/Post.js'
 // import { users, posts } from './data/index.js'
@@ -46,7 +48,10 @@ app.use(
 app.use(morgan('comman'))
 app.use(bodyParser.json({ limit: '30mb', extended: true }))
 app.use(bodyParser.urlencoded({ limit: '30mb', extended: true }))
-app.use(cors())
+
+// config cors
+app.use(credentials)
+app.use(cors(corsOptions))
 
 // serve static file
 app.use('/assets', express.static(path.join(__dirname, '/public/assets')))

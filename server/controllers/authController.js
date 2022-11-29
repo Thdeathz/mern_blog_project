@@ -87,8 +87,8 @@ export const login = async (req, res) => {
 
       res.clearCookie('jwt', {
         httpOnly: true,
-        sameSite: 'None'
-        // secure: true
+        sameSite: 'None',
+        secure: true
       })
     }
 
@@ -99,13 +99,23 @@ export const login = async (req, res) => {
     res.cookie('jwt', newRefreshToken, {
       httpOnly: true,
       sameSite: 'None',
-      // secure: true,
+      secure: true,
       maxAge: 24 * 60 * 60 * 1000
     })
 
     res.status(200).json({
       token: accessToken,
-      user: result
+      user: {
+        _id: result._id,
+        firstName: result.firstName,
+        lastName: result.lastName,
+        picturePath: result.picturePath,
+        friends: result.friends,
+        location: result.location,
+        occupation: result.occupation,
+        viewedProfile: result.viewedProfile,
+        impressions: result.impressions
+      }
     })
   } catch (error) {
     res.status(500).json({ error: error.message })
@@ -123,8 +133,8 @@ export const logout = async (req, res) => {
   if (!user) {
     res.clearCookie('jwt', {
       httpOnly: true,
-      sameSite: 'None'
-      // secure: true
+      sameSite: 'None',
+      secure: true
     })
     return res.sendStatus(403) // Forbidden
   }
@@ -135,8 +145,8 @@ export const logout = async (req, res) => {
 
   res.clearCookie('jwt', {
     httpOnly: true,
-    sameSite: 'None'
-    // secure: true
+    sameSite: 'None',
+    secure: true
   })
 
   res.status(200).json({ message: 'Logout successfully.' })

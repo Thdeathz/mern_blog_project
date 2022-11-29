@@ -7,7 +7,7 @@ import { useDispatch } from 'react-redux'
 import Dropzone from 'react-dropzone'
 import { Box, Button, TextField, Typography, useMediaQuery, useTheme } from '@mui/material'
 import { FlexBetween } from '~/components'
-import { setLogin } from '~/redux/authSlice'
+import { setCredentials, useLoginMutation } from '~/redux/authSlice'
 
 const registerSchema = yup.object().shape({
   firstName: yup.string().required('required'),
@@ -45,6 +45,7 @@ const Form = ({ isLogin, isRegister }) => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const isNonMobileScreens = useMediaQuery('(min-width:600px)')
+  const [login, { isLoading }] = useLoginMutation()
 
   const register = async (values, onSubmitProps) => {
     const formData = new FormData()
@@ -65,20 +66,15 @@ const Form = ({ isLogin, isRegister }) => {
     }
   }
 
-  const login = async (values, onSubmitProps) => {
-    const loggedInResponse = await fetch('http://localhost:3500/auth/login', {
-      method: 'POST',
-      headers: { 'Content-type': 'application/json' },
-      body: JSON.stringify(values)
-    })
+  const handleLogin = async (values, onSubmitProps) => {
+    const loggedInUser = await login(values).unwrap()
 
-    const loggedIn = await loggedInResponse.json()
     onSubmitProps.resetForm()
-    if (loggedIn) {
+    if (loggedInUser) {
       dispatch(
-        setLogin({
-          user: loggedIn.user,
-          token: loggedIn.token
+        setCredentials({
+          token: loggedInUser.token,
+          user: loggedInUser.user
         })
       )
       navigate('/')
@@ -86,7 +82,7 @@ const Form = ({ isLogin, isRegister }) => {
   }
 
   const handleFormSubmit = async (values, onSubmitProps) => {
-    if (isLogin) await login(values, onSubmitProps)
+    if (isLogin) await handleLogin(values, onSubmitProps)
     if (isRegister) await register(values, onSubmitProps)
   }
   return (
