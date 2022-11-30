@@ -10,7 +10,10 @@ const authSlice = createSlice({
       state.user = user
       state.token = token
     },
-    logout: (state, action) => {
+    setFriends: (state, action) => {
+      state.user.friends = action.payload
+    },
+    setLogout: (state, action) => {
       state.user = null
       state.token = null
     }
@@ -26,9 +29,22 @@ export const authApiSlice = apiSlice.injectEndpoints({
         body: { ...credentials }
       })
     }),
+    register: builder.mutation({
+      query: newUserData => ({
+        url: '/auth/register',
+        method: 'POST',
+        body: newUserData
+      })
+    }),
     refresh: builder.mutation({
       query: () => ({
         url: '/refresh',
+        method: 'GET'
+      })
+    }),
+    logout: builder.mutation({
+      query: () => ({
+        url: '/auth/logout',
         method: 'GET'
       })
     })
@@ -36,9 +52,10 @@ export const authApiSlice = apiSlice.injectEndpoints({
 })
 
 // RTK api call
-export const { useLoginMutation, useRefreshMutation } = authApiSlice
+export const { useLoginMutation, useRegisterMutation, useRefreshMutation, useLogoutMutation } =
+  authApiSlice
 
-export const { setCredentials, logout } = authSlice.actions
+export const { setCredentials, setFriends, setLogout } = authSlice.actions
 
 export default authSlice.reducer
 

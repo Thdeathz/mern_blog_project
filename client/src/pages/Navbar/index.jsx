@@ -22,14 +22,15 @@ import {
   Menu,
   Close
 } from '@mui/icons-material'
-import { setLogout, setMode } from '~/redux/userSlice'
+import { setMode } from '~/redux/settingSlice'
 import { FlexBetween } from '~/components'
-import { selectCurrentUser } from '~/redux/authSlice'
+import { setLogout, selectCurrentUser, useLogoutMutation } from '~/redux/authSlice'
 
 const Navbar = () => {
   const [isMobileMenuToggled, SetIsMobileMenuToggled] = useState(false)
   const dispatch = useDispatch()
   const navigate = useNavigate()
+  const [logout] = useLogoutMutation()
   const user = useSelector(selectCurrentUser)
 
   const isNonMobileScreens = useMediaQuery('(min-width: 1000px)')
@@ -42,6 +43,18 @@ const Navbar = () => {
   const alt = theme.palette.background.alt
 
   const fullname = `${user.firstName} ${user.lastName}`
+
+  const handleLogout = async () => {
+    try {
+      console.log('===> logging out')
+      await logout()
+      dispatch(setLogout())
+      navigate('/login')
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
   return (
     <FlexBetween padding="1rem 6%" backgroundColor={alt}>
       <FlexBetween gap="1.75rem">
@@ -108,14 +121,7 @@ const Navbar = () => {
               <MenuItem value={fullname}>
                 <Typography>{fullname}</Typography>
               </MenuItem>
-              <MenuItem
-                onClick={() => {
-                  dispatch(setLogout())
-                  navigate('/login')
-                }}
-              >
-                Log Out
-              </MenuItem>
+              <MenuItem onClick={handleLogout}>Log Out</MenuItem>
             </Select>
           </FormControl>
         </FlexBetween>
@@ -181,14 +187,7 @@ const Navbar = () => {
                 <MenuItem value={fullname}>
                   <Typography>{fullname}</Typography>
                 </MenuItem>
-                <MenuItem
-                  onClick={() => {
-                    dispatch(setLogout())
-                    navigate('/login')
-                  }}
-                >
-                  Log Out
-                </MenuItem>
+                <MenuItem onClick={handleLogout}>Log Out</MenuItem>
               </Select>
             </FormControl>
           </FlexBetween>

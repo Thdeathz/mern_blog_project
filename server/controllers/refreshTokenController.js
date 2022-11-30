@@ -13,7 +13,6 @@ export const refreshToken = async (req, res) => {
   })
 
   const user = await User.findOne({ refreshToken }).exec()
-  console.log(user)
   // Detected refresh token reuse
   if (!user) {
     jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, async (err, decoded) => {

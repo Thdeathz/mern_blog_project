@@ -8,7 +8,7 @@ import { themeSettings } from './app/theme'
 import { PersistLogin, RequireAuth } from './components'
 
 function App() {
-  const mode = useSelector(state => state.user.mode)
+  const mode = useSelector(state => state.setting.mode)
   const theme = useMemo(() => createTheme(themeSettings(mode)), [mode])
 
   return (
@@ -16,6 +16,7 @@ function App() {
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <Routes>
+          {/* PUBLIC ROUTES */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
 

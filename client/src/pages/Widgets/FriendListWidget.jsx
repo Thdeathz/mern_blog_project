@@ -2,56 +2,51 @@ import { Box, Typography, useTheme } from '@mui/material'
 import React, { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Friend, WidgetWrapper } from '~/components'
-import { selectCurrentToken, selectCurrentUser } from '~/redux/authSlice'
-import { setFriends } from '~/redux/userSlice'
+import { useGetFriendsQuery } from '~/redux/friendsSlice'
 
 // eslint-disable-next-line react/prop-types
 const FriendListWidget = ({ userId }) => {
   const dispatch = useDispatch()
   const { palette } = useTheme()
-  const token = useSelector(selectCurrentToken)
-  const { friends } = useSelector(selectCurrentUser)
-
-  useEffect(() => {
-    const getFriends = async () => {
-      const response = await fetch(`http://localhost:3500/users/${userId}/friends`, {
-        method: 'GET',
-        headers: { Authorization: `Bearer ${token}` }
-      })
-
-      const data = await response.json()
-      dispatch(setFriends({ friends: data }))
-    }
-
-    return () => getFriends()
-  }, [])
+  const { data: friendsList, isLoading } = useGetFriendsQuery(userId)
 
   return (
-    <WidgetWrapper>
-      <Typography color={palette.neutral.dark} variant="h5" fontWeight="500" sx={{ mb: '1.5rem' }}>
-        Friend List
-      </Typography>
-      <Box display="flex" flexDirection="column" gap="1.5rem">
-        {friends?.map(friend => (
-          <Friend
-            key={friend._id}
-            friendId={friend._id}
-            name={`${friend.firstName} ${friend.lastName}`}
-            subtitle={friend.occupation}
-            userPicturePath={friend.picturePath}
-          />
-        ))}
-        {friends.length === 0 && (
+    <>
+      {isLoading ? (
+        <p>Loading...</p>
+      ) : (
+        <WidgetWrapper>
           <Typography
-            sx={{
-              color: palette.neutral.medium
-            }}
+            color={palette.neutral.dark}
+            variant="h5"
+            fontWeight="500"
+            sx={{ mb: '1.5rem' }}
           >
-            {`No friends ><!`}
+            Friend List
           </Typography>
-        )}
-      </Box>
-    </WidgetWrapper>
+          <Box display="flex" flexDirection="column" gap="1.5rem">
+            {friendsList.ids.map(id => (
+              <Friend
+                key={id}
+                friendId={id}
+                name={`${friendsList.entities[id].firstName} ${friendsList.entities[id].lastName}`}
+                subtitle={friendsList.entities[id].occupation}
+                userPicturePath={friendsList.entities[id].picturePath}
+              />
+            ))}
+            {friendsList.ids.length === 0 && (
+              <Typography
+                sx={{
+                  color: palette.neutral.medium
+                }}
+              >
+                {`No friends ><!`}
+              </Typography>
+            )}
+          </Box>
+        </WidgetWrapper>
+      )}
+    </>
   )
 }
 
