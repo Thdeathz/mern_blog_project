@@ -1,4 +1,5 @@
 /* eslint-disable react/prop-types */
+import React, { useState } from 'react'
 import {
   ChatBubbleOutlineOutlined,
   FavoriteBorderOutlined,
@@ -6,28 +7,29 @@ import {
   ShareOutlined
 } from '@mui/icons-material'
 import { Box, Divider, IconButton, Typography, useTheme } from '@mui/material'
-import React, { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { FlexBetween, WidgetWrapper } from '~/components'
 import Friend from '~/components/Friend'
 import { selectCurrentToken, selectCurrentUser } from '~/redux/authSlice'
-import { setPost } from '~/redux/userSlice'
+import { selectPostById, usePostReactionMutation } from '~/redux/postsSlice'
 
-const PostWidget = ({
-  postId,
-  postUserId,
-  name,
-  description,
-  location,
-  picturePath,
-  userPicturePath,
-  likes,
-  comments
-}) => {
+const PostWidget = ({ postId }) => {
   const dispatch = useDispatch()
+  const {
+    userId: postUserId,
+    firstName,
+    lastName,
+    description,
+    location,
+    picturePath,
+    userPicturePath,
+    likes,
+    comments
+  } = useSelector(state => selectPostById(state, postId))
   const [isComment, setIsComment] = useState(false)
+  const [postReaction] = usePostReactionMutation()
   const token = useSelector(selectCurrentToken)
-  const { loggedInUserId: _id } = useSelector(selectCurrentUser)
+  const { _id: loggedInUserId } = useSelector(selectCurrentUser)
   const isLiked = likes[loggedInUserId]
   const likeCount = Object.keys(likes).length
 
@@ -36,26 +38,21 @@ const PostWidget = ({
   const primary = palette.primary.main
 
   const patchLike = async () => {
-    const response = await fetch(`http://localhost:3500/posts/${postId}/like`, {
-      method: 'PATCH',
-      headers: {
-        Authorization: 'Bearer ' + token,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ userId: loggedInUserId })
-    })
-
-    const updatedPost = await response.json()
-    dispatch(setPost({ post: updatedPost }))
+    try {
+      await postReaction({ userId: loggedInUserId, postId }).unwrap()
+    } catch (error) {
+      console.error(error)
+    }
   }
 
   return (
     <WidgetWrapper m="2rem 0">
       <Friend
         friendId={postUserId}
-        name={name}
+        name={`${firstName} ${lastName}`}
         subtitle={location}
         userPicturePath={userPicturePath}
+        me={postUserId === loggedInUserId}
       />
       <Typography color={main} sx={{ mt: '1rem' }}>
         {description}
@@ -96,7 +93,7 @@ const PostWidget = ({
       {isComment && (
         <Box mt="0.5rem">
           {comments.map((comment, index) => (
-            <Box key={`${name}-${index}`}>
+            <Box key={`${firstName}-${index}`}>
               <Divider />
               <Typography sx={{ color: main, m: '0.5rem 0', pl: '1rem' }}>{comment}</Typography>
             </Box>

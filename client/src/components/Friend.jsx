@@ -2,18 +2,22 @@ import { Box, IconButton, Typography, useTheme } from '@mui/material'
 import React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
-import { setFriends } from '~/redux/userSlice'
 import UserImage from './UserImage'
 import FlexBetween from './FlexBetween'
 import { PersonAddOutlined, PersonRemoveOutlined } from '@mui/icons-material'
-import { selectCurrentToken, selectCurrentUser } from '~/redux/authSlice'
+import { setFriends, selectCurrentUser } from '~/redux/authSlice'
+import {
+  selectFriendIds,
+  useAddRemoveFriendMutation,
+  useGetFriendsQuery
+} from '~/redux/friendsSlice'
 
 // eslint-disable-next-line react/prop-types
-const Friend = ({ friendId, name, subtitle, userPicturePath }) => {
+const Friend = ({ friendId, name, subtitle, userPicturePath, me = false }) => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
+  const [addRemoveFriend] = useAddRemoveFriendMutation()
   const { _id, friends } = useSelector(selectCurrentUser)
-  const token = useSelector(selectCurrentToken)
 
   const { palette } = useTheme()
   const primaryLight = palette.primary.light
@@ -21,19 +25,21 @@ const Friend = ({ friendId, name, subtitle, userPicturePath }) => {
   const main = palette.neutral.main
   const medium = palette.neutral.medium
 
-  const isFriend = Boolean(friends.find(friend => friend._id === friendId))
+  const isFriend = Boolean(friends.find(id => id === friendId))
 
   const patchFriend = async () => {
-    const response = await fetch(`http://localhost:3500/users/${_id}/${friendId}`, {
-      method: 'PATCH',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json'
+    try {
+      const res = await addRemoveFriend({
+        userId: _id,
+        friendId: friendId
+      }).unwrap()
+      if (res) {
+        const newFriendsIds = res.map(friend => friend.id)
+        dispatch(setFriends(newFriendsIds))
       }
-    })
-
-    const data = await response.json()
-    dispatch(setFriends({ friends: data }))
+    } catch (error) {
+      console.error(error)
+    }
   }
 
   return (
@@ -63,13 +69,18 @@ const Friend = ({ friendId, name, subtitle, userPicturePath }) => {
           </Typography>
         </Box>
       </FlexBetween>
-      <IconButton onClick={() => patchFriend()} sx={{ backgroundColor: primaryLight, p: '0.6rem' }}>
-        {isFriend ? (
-          <PersonRemoveOutlined sx={{ color: primaryDark }} />
-        ) : (
-          <PersonAddOutlined sx={{ color: primaryDark }} />
-        )}
-      </IconButton>
+      {!me && (
+        <IconButton
+          onClick={() => patchFriend()}
+          sx={{ backgroundColor: primaryLight, p: '0.6rem' }}
+        >
+          {isFriend ? (
+            <PersonRemoveOutlined sx={{ color: primaryDark }} />
+          ) : (
+            <PersonAddOutlined sx={{ color: primaryDark }} />
+          )}
+        </IconButton>
+      )}
     </FlexBetween>
   )
 }

@@ -8,18 +8,6 @@ export const register = async (req, res) => {
     const { firstName, lastName, email, password, picturePath, friends, location, occupation } =
       req.body
 
-    if (
-      !firstName ||
-      !lastName ||
-      !email ||
-      !password ||
-      !picturePath ||
-      !friends ||
-      !location ||
-      !occupation
-    )
-      return res.sendStatus(400)
-
     const duplicate = await User.findOne({ email }).exec()
     if (duplicate) return res.status(409) // conflict
 

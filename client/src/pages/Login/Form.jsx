@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
 import { Formik } from 'formik'
 import * as yup from 'yup'
@@ -7,7 +7,7 @@ import { useDispatch } from 'react-redux'
 import Dropzone from 'react-dropzone'
 import { Box, Button, TextField, Typography, useMediaQuery, useTheme } from '@mui/material'
 import { FlexBetween } from '~/components'
-import { setCredentials, useLoginMutation } from '~/redux/authSlice'
+import { setCredentials, useLoginMutation, useRegisterMutation } from '~/redux/authSlice'
 
 const registerSchema = yup.object().shape({
   firstName: yup.string().required('required'),
@@ -46,23 +46,21 @@ const Form = ({ isLogin, isRegister }) => {
   const navigate = useNavigate()
   const isNonMobileScreens = useMediaQuery('(min-width:600px)')
   const [login, { isLoading }] = useLoginMutation()
+  const [register, { isLoading: registerLogin }] = useRegisterMutation()
 
-  const register = async (values, onSubmitProps) => {
+  const handleRegister = async (values, onSubmitProps) => {
     const formData = new FormData()
     for (let value in values) {
       formData.append(value, values[value])
     }
     formData.append('picturePath', values.picture.name)
+    try {
+      await register(formData).unwrap()
 
-    const savedUserResponse = await fetch('http://localhost:3500/auth/register', {
-      method: 'POST',
-      body: formData
-    })
-
-    const savedUser = await savedUserResponse.json()
-    onSubmitProps.resetForm()
-    if (savedUser) {
+      onSubmitProps.resetForm()
       navigate('/login')
+    } catch (error) {
+      console.error(error)
     }
   }
 
@@ -83,7 +81,7 @@ const Form = ({ isLogin, isRegister }) => {
 
   const handleFormSubmit = async (values, onSubmitProps) => {
     if (isLogin) await handleLogin(values, onSubmitProps)
-    if (isRegister) await register(values, onSubmitProps)
+    if (isRegister) await handleRegister(values, onSubmitProps)
   }
   return (
     <Formik

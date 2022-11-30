@@ -7,7 +7,7 @@ import { selectCurrentUser } from '~/redux/authSlice'
 
 const HomePage = () => {
   const isNonMobileScreens = useMediaQuery('(min-width:1000px)')
-  const { _id, picturePath } = useSelector(selectCurrentUser)
+  const currentUser = useSelector(selectCurrentUser)
 
   useEffect(() => {
     document.title = 'Thdeathz'
@@ -15,6 +15,7 @@ const HomePage = () => {
 
   return (
     <Box>
+      {console.log('==> re-render')}
       <Navbar />
       <Box
         width="100%"
@@ -24,20 +25,20 @@ const HomePage = () => {
         justifyContent="space-between"
       >
         <Box flexBasis={isNonMobileScreens ? '26%' : undefined}>
-          <UserWidget userId={_id} picturePath={picturePath} />
+          <UserWidget user={currentUser} />
         </Box>
         <Box
           flexBasis={isNonMobileScreens ? '42%' : undefined}
           mt={isNonMobileScreens ? undefined : '2rem'}
         >
-          <MyPostWidget picturePath={picturePath} />
-          {/* <PostsWidget userId={_id} /> */}
+          <MyPostWidget picturePath={currentUser.picturePath} />
+          <PostsWidget />
         </Box>
         {isNonMobileScreens && (
           <Box flexBasis="26%">
             <AdvertWidget />
             <Box m="2rem 0"></Box>
-            <FriendListWidget userId={_id} />
+            <FriendListWidget userId={currentUser._id} />
           </Box>
         )}
       </Box>

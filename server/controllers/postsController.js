@@ -1,11 +1,44 @@
 import Post from '../models/Post.js'
 import User from '../models/User.js'
 
+const responseFormat = posts => {
+  return posts.map(
+    ({
+      _id,
+      userId,
+      firstName,
+      lastName,
+      location,
+      description,
+      userPicturePath,
+      picturePath,
+      likes,
+      comments,
+      createdAt
+    }) => {
+      return {
+        id: _id,
+        userId,
+        firstName,
+        lastName,
+        location,
+        description,
+        userPicturePath,
+        picturePath,
+        likes,
+        comments,
+        createdAt
+      }
+    }
+  )
+}
+
 /* CREATE */
 export const createPost = async (req, res) => {
   try {
     const { userId, description, picturePath } = req.body
     const user = await User.findById(userId)
+    if (!userId) return res.status(404).json({ message: 'User not found.' })
     const newPost = await Post.create({
       userId,
       firstName: user.firstName,
@@ -29,7 +62,8 @@ export const createPost = async (req, res) => {
 export const getFeedPosts = async (req, res) => {
   try {
     const posts = await Post.find()
-    res.status(200).json(posts)
+    const formatedPosts = responseFormat(posts)
+    res.status(200).json(formatedPosts)
   } catch (error) {
     res.status(404).json({ message: error.message })
   }
@@ -39,7 +73,9 @@ export const getUserPosts = async (req, res) => {
   try {
     const { userId } = req.params
     const posts = await Post.find({ userId })
-    res.status(200).json(posts)
+
+    const formatedPosts = responseFormat(posts)
+    res.status(200).json(formatedPosts)
   } catch (error) {
     res.status(404).json({ message: error.message })
   }

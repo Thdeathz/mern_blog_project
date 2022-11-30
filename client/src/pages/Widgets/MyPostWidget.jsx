@@ -9,7 +9,7 @@ import {
   useMediaQuery,
   useTheme
 } from '@mui/material'
-import { useDispatch, useSelector } from 'react-redux'
+import { useSelector } from 'react-redux'
 import { FlexBetween, UserImage, WidgetWrapper } from '~/components'
 import Dropzone from 'react-dropzone'
 import {
@@ -21,18 +21,17 @@ import {
   MicOutlined,
   MoreHorizOutlined
 } from '@mui/icons-material'
-import { setPosts } from '~/redux/userSlice'
-import { selectCurrentToken, selectCurrentUser } from '~/redux/authSlice'
+import { selectCurrentUser } from '~/redux/authSlice'
+import { useAddNewPostMutation } from '~/redux/postsSlice'
 
 // eslint-disable-next-line react/prop-types
 const MyPostWidget = ({ picturePath }) => {
-  const dispatch = useDispatch()
   const [isImage, setIsImage] = useState(false)
   const [image, setImage] = useState(null)
   const [post, setPost] = useState('')
   const { palette } = useTheme()
   const { _id } = useSelector(selectCurrentUser)
-  const token = useSelector(selectCurrentToken)
+  const [addNewPost, { isLoading }] = useAddNewPostMutation()
   const isNonMoblieScreens = useMediaQuery('(min-width:1000px)')
 
   const mediumMain = palette.neutral.mediumMain
@@ -47,14 +46,7 @@ const MyPostWidget = ({ picturePath }) => {
       formData.append('picturePath', image.name)
     }
 
-    const response = await fetch(`http://localhost:3500/posts`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${token}` },
-      body: formData
-    })
-
-    const posts = await response.json()
-    dispatch(setPosts({ posts }))
+    await addNewPost(formData).unwrap()
     setImage(null)
     setPost('')
   }

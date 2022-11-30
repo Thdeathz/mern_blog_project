@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react'
+/* eslint-disable react/prop-types */
+import React from 'react'
 import {
   EditOutlined,
   LocationOnOutlined,
@@ -7,39 +8,31 @@ import {
 } from '@mui/icons-material'
 import { Box, Typography, Divider, useTheme } from '@mui/material'
 import { UserImage, FlexBetween, WidgetWrapper } from '~/components'
-import { useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import images from '~/assets'
-import { selectCurrentToken } from '~/redux/authSlice'
 
-// eslint-disable-next-line react/prop-types
-const UserWidget = ({ userId, picturePath }) => {
-  const [user, setUser] = useState(null)
+const UserWidget = ({ user }) => {
   const { palette } = useTheme()
   const navigate = useNavigate()
-  const token = useSelector(selectCurrentToken)
   const dark = palette.neutral.dark
   const medium = palette.neutral.medium
   const main = palette.neutral.main
-
-  useEffect(() => {
-    const getUser = async () => {
-      const response = await fetch(`http://localhost:3500/users/${userId}`, {
-        method: 'GET',
-        headers: { Authorization: `Bearer ${token}` }
-      })
-      const data = await response.json()
-      setUser({ ...data })
-    }
-
-    return () => getUser()
-  }, [])
 
   if (!user) {
     return null
   }
 
-  const { firstName, lastName, location, occupation, viewedProfile, impressions, friends } = user
+  const {
+    _id: userId,
+    firstName,
+    lastName,
+    location,
+    occupation,
+    picturePath,
+    viewedProfile,
+    impressions,
+    friends
+  } = user
 
   return (
     <WidgetWrapper>
