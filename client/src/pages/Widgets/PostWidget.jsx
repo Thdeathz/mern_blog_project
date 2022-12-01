@@ -28,7 +28,6 @@ const PostWidget = ({ postId }) => {
   } = useSelector(state => selectPostById(state, postId))
   const [isComment, setIsComment] = useState(false)
   const [postReaction] = usePostReactionMutation()
-  const token = useSelector(selectCurrentToken)
   const { _id: loggedInUserId } = useSelector(selectCurrentUser)
   const isLiked = likes[loggedInUserId]
   const likeCount = Object.keys(likes).length
@@ -66,7 +65,11 @@ const PostWidget = ({ postId }) => {
             borderRadius: '0.75rem',
             marginTop: '0.75rem'
           }}
-          src={`http://localhost:3500/assets/${picturePath}`}
+          src={
+            picturePath.startsWith('http')
+              ? picturePath
+              : `http://localhost:3500/assets/${picturePath}`
+          }
         />
       )}
       <FlexBetween mt="0.25rem">

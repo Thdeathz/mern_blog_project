@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   Box,
   Button,
@@ -14,7 +14,7 @@ import { FlexBetween, UserImage, WidgetWrapper } from '~/components'
 import Dropzone from 'react-dropzone'
 import {
   AttachFileOutlined,
-  DeleteOutlined,
+  CloseOutlined,
   EditOutlined,
   GifBoxOutlined,
   ImageOutlined,
@@ -23,12 +23,14 @@ import {
 } from '@mui/icons-material'
 import { selectCurrentUser } from '~/redux/authSlice'
 import { useAddNewPostMutation } from '~/redux/postsSlice'
+import useStorage from '~/hooks/useStorage'
 
 // eslint-disable-next-line react/prop-types
 const MyPostWidget = ({ picturePath }) => {
   const [isImage, setIsImage] = useState(false)
   const [image, setImage] = useState(null)
   const [post, setPost] = useState('')
+  const uploadFile = useStorage()
   const { palette } = useTheme()
   const { _id } = useSelector(selectCurrentUser)
   const [addNewPost, { isLoading }] = useAddNewPostMutation()
@@ -37,19 +39,38 @@ const MyPostWidget = ({ picturePath }) => {
   const mediumMain = palette.neutral.mediumMain
   const medium = palette.neutral.medium
 
+  const handleUploadImage = async file => {
+    if (file) {
+      file.preview = URL.createObjectURL(file)
+      setImage(file)
+    }
+  }
+
   const handlePost = async () => {
-    const formData = new FormData()
-    formData.append('userId', _id)
-    formData.append('description', post)
     if (image) {
-      formData.append('picture', image)
-      formData.append('picturePath', image.name)
+      const imageUrl = await uploadFile(image)
+      await addNewPost({
+        userId: _id,
+        description: post,
+        picturePath: imageUrl
+      }).unwrap()
+    } else {
+      await addNewPost({
+        userId: _id,
+        description: post
+      }).unwrap()
     }
 
-    await addNewPost(formData).unwrap()
+    setIsImage(false)
     setImage(null)
     setPost('')
   }
+
+  useEffect(() => {
+    return () => {
+      URL.revokeObjectURL(image?.preview)
+    }
+  }, [image])
 
   return (
     <WidgetWrapper>
@@ -72,37 +93,68 @@ const MyPostWidget = ({ picturePath }) => {
           <Dropzone
             acceptedFiles=".jpg,.jpeg,.png"
             multiple={false}
-            onDrop={acceptedFiles => setImage(acceptedFiles[0])}
+            onDrop={acceptedFiles => handleUploadImage(acceptedFiles[0])}
           >
             {({ getRootProps, getInputProps }) => (
-              <FlexBetween>
+              <Box position="relative">
                 <Box
                   {...getRootProps()}
-                  border={`2px dashed ${palette.primary.main}`}
-                  p="1rem"
                   width="100%"
+                  display="flex"
+                  justifyContent="center"
+                  alignItems="center"
+                  height="auto"
                   sx={{
-                    '&:hover': {
-                      cursor: 'pointer'
-                    }
+                    borderRadius: '5px',
+                    backgroundColor: palette.neutral.light
                   }}
                 >
                   <input {...getInputProps()} />
                   {!image ? (
-                    <p>Add Image Here</p>
+                    <Box
+                      display="flex"
+                      justifyContent="center"
+                      alignItems="center"
+                      height="300px"
+                      width="100%"
+                      sx={{
+                        borderRadius: '5px',
+                        '&:hover': {
+                          cursor: 'pointer',
+                          backgroundColor: medium
+                        }
+                      }}
+                    >
+                      <p>Add Image Here</p>
+                    </Box>
                   ) : (
-                    <FlexBetween>
-                      <Typography>{image.name}</Typography>
-                      <EditOutlined />
-                    </FlexBetween>
+                    <img
+                      width="100%"
+                      alt="preview"
+                      style={{
+                        borderRadius: '5px',
+                        cursor: 'pointer'
+                      }}
+                      src={image.preview}
+                    />
                   )}
                 </Box>
-                {image && (
-                  <IconButton onClick={() => setImage(null)} sx={{ width: '15%' }}>
-                    <DeleteOutlined />
-                  </IconButton>
-                )}
-              </FlexBetween>
+                <IconButton
+                  onClick={() => {
+                    setIsImage(false)
+                    setImage(null)
+                  }}
+                  sx={{
+                    backgroundColor: palette.background.alt,
+                    padding: '0.2rem',
+                    position: 'absolute',
+                    top: '0.25rem',
+                    right: '0.25rem'
+                  }}
+                >
+                  <CloseOutlined sx={{ color: mediumMain }} />
+                </IconButton>
+              </Box>
             )}
           </Dropzone>
         </Box>
@@ -111,13 +163,12 @@ const MyPostWidget = ({ picturePath }) => {
       <Divider sx={{ margin: '1.25rem 0' }} />
 
       <FlexBetween>
-        <FlexBetween gap="0.25rem" onClick={() => setIsImage(!isImage)}>
+        <FlexBetween gap="0.25rem" sx={{ cursor: 'pointer' }} onClick={() => setIsImage(!isImage)}>
           <ImageOutlined sx={{ color: mediumMain }} />
           <Typography
             color={mediumMain}
             sx={{
               '&:hover': {
-                cursor: 'pointer',
                 color: medium
               }
             }}

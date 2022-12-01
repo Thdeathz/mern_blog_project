@@ -8,6 +8,7 @@ import Dropzone from 'react-dropzone'
 import { Box, Button, TextField, Typography, useMediaQuery, useTheme } from '@mui/material'
 import { FlexBetween } from '~/components'
 import { setCredentials, useLoginMutation, useRegisterMutation } from '~/redux/authSlice'
+import useStorage from '~/hooks/useStorage'
 
 const registerSchema = yup.object().shape({
   firstName: yup.string().required('required'),
@@ -15,8 +16,7 @@ const registerSchema = yup.object().shape({
   email: yup.string().email('invaild email').required('required'),
   password: yup.string().required('required'),
   location: yup.string().required('required'),
-  occupation: yup.string().required('required'),
-  picture: yup.string().required('required')
+  occupation: yup.string().required('required')
 })
 
 const loginSchema = yup.object().shape({
@@ -45,17 +45,33 @@ const Form = ({ isLogin, isRegister }) => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const isNonMobileScreens = useMediaQuery('(min-width:600px)')
+  const uploadFile = useStorage()
   const [login, { isLoading }] = useLoginMutation()
   const [register, { isLoading: registerLogin }] = useRegisterMutation()
 
   const handleRegister = async (values, onSubmitProps) => {
-    const formData = new FormData()
-    for (let value in values) {
-      formData.append(value, values[value])
-    }
-    formData.append('picturePath', values.picture.name)
     try {
-      await register(formData).unwrap()
+      if (values.picture) {
+        const imageUrl = await uploadFile(values.picture)
+        await register({
+          firstName: values.firstName,
+          lastName: values.lastName,
+          email: values.email,
+          password: values.password,
+          location: values.location,
+          occupation: values.occupation,
+          picturePath: imageUrl
+        }).unwrap()
+      } else {
+        await register({
+          firstName: values.firstName,
+          lastName: values.lastName,
+          email: values.email,
+          password: values.password,
+          location: values.location,
+          occupation: values.occupation
+        }).unwrap()
+      }
 
       onSubmitProps.resetForm()
       navigate('/login')

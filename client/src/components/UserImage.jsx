@@ -1,7 +1,8 @@
+/* eslint-disable react/prop-types */
 import React from 'react'
 import { Box } from '@mui/material'
+import images from '~/assets'
 
-// eslint-disable-next-line react/prop-types
 const UserImage = ({ image, size = '60px' }) => {
   return (
     <Box width={size} height={size}>
@@ -13,7 +14,13 @@ const UserImage = ({ image, size = '60px' }) => {
         width={size}
         height={size}
         alt="user"
-        src={`http://localhost:3500/assets/${image}`}
+        src={
+          image
+            ? image.startsWith('http')
+              ? image
+              : `http://localhost:3500/assets/${image}`
+            : images.defaultAvatar
+        }
       />
     </Box>
   )
