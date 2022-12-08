@@ -1,34 +1,36 @@
 /* eslint-disable react/prop-types */
 import React, { useState } from 'react'
 import {
+  ChatBubbleOutlined,
   ChatBubbleOutlineOutlined,
   FavoriteBorderOutlined,
   FavoriteOutlined,
+  MoreHorizOutlined,
   ShareOutlined
 } from '@mui/icons-material'
-import { Box, Divider, IconButton, Typography, useTheme } from '@mui/material'
+import { Box, IconButton, Typography, useTheme } from '@mui/material'
 import { useDispatch, useSelector } from 'react-redux'
-import { FlexBetween, WidgetWrapper } from '~/components'
-import Friend from '~/components/Friend'
-import { selectCurrentToken, selectCurrentUser } from '~/redux/authSlice'
+import formatDistance from 'date-fns/formatDistance'
+import { FlexBetween, UserImage, WidgetWrapper } from '~/components'
+import { selectCurrentUser } from '~/redux/authSlice'
 import { selectPostById, usePostReactionMutation } from '~/redux/postsSlice'
+import Comments from './Comments'
 
 const PostWidget = ({ postId }) => {
-  const dispatch = useDispatch()
   const {
     userId: postUserId,
     firstName,
     lastName,
     description,
-    location,
     picturePath,
     userPicturePath,
     likes,
-    comments
+    comments,
+    createdAt
   } = useSelector(state => selectPostById(state, postId))
   const [isComment, setIsComment] = useState(false)
   const [postReaction] = usePostReactionMutation()
-  const { _id: loggedInUserId } = useSelector(selectCurrentUser)
+  const { _id: loggedInUserId, picturePath: currentUserAvatar } = useSelector(selectCurrentUser)
   const isLiked = likes[loggedInUserId]
   const likeCount = Object.keys(likes).length
 
@@ -46,13 +48,36 @@ const PostWidget = ({ postId }) => {
 
   return (
     <WidgetWrapper m="2rem 0">
-      <Friend
-        friendId={postUserId}
-        name={`${firstName} ${lastName}`}
-        subtitle={location}
-        userPicturePath={userPicturePath}
-        me={postUserId === loggedInUserId}
-      />
+      <FlexBetween>
+        <FlexBetween gap="1rem">
+          <UserImage image={userPicturePath} />
+          <Box
+            onClick={() => {
+              navigate(`/profile/${postUserId}`)
+            }}
+          >
+            <Typography
+              color={main}
+              variant="h5"
+              fontWeight="500"
+              sx={{
+                '&:hover': {
+                  cursor: 'pointer',
+                  color: palette.primary.light
+                }
+              }}
+            >
+              {`${firstName} ${lastName}`}
+            </Typography>
+            <Typography color={palette.neutral.medium} fontSize="0.75rem">
+              {formatDistance(new Date(createdAt), new Date())}
+            </Typography>
+          </Box>
+        </FlexBetween>
+        <IconButton>
+          <MoreHorizOutlined fontSize="large" sx={{ color: main }} />
+        </IconButton>
+      </FlexBetween>
       <Typography color={main} sx={{ mt: '1rem' }}>
         {description}
       </Typography>
@@ -83,7 +108,7 @@ const PostWidget = ({ postId }) => {
 
           <FlexBetween gap="0.3rem">
             <IconButton onClick={() => setIsComment(!isComment)}>
-              <ChatBubbleOutlineOutlined />
+              {isComment ? <ChatBubbleOutlined /> : <ChatBubbleOutlineOutlined />}
             </IconButton>
             <Typography>{comments.length}</Typography>
           </FlexBetween>
@@ -93,17 +118,7 @@ const PostWidget = ({ postId }) => {
           <ShareOutlined />
         </IconButton>
       </FlexBetween>
-      {isComment && (
-        <Box mt="0.5rem">
-          {comments.map((comment, index) => (
-            <Box key={`${firstName}-${index}`}>
-              <Divider />
-              <Typography sx={{ color: main, m: '0.5rem 0', pl: '1rem' }}>{comment}</Typography>
-            </Box>
-          ))}
-          <Divider />
-        </Box>
-      )}
+      {isComment && <Comments userPicturePath={currentUserAvatar} comments={comments} />}
     </WidgetWrapper>
   )
 }

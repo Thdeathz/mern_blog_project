@@ -56,7 +56,13 @@ const Navbar = () => {
   }
 
   return (
-    <FlexBetween padding="1rem 6%" backgroundColor={alt}>
+    <FlexBetween
+      position="sticky"
+      top="0"
+      padding="1rem 6%"
+      backgroundColor={alt}
+      sx={{ zIndex: '10' }}
+    >
       <FlexBetween gap="1.75rem">
         <Typography
           fontWeight="bold"

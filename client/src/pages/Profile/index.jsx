@@ -30,11 +30,14 @@ const ProfilePage = () => {
             display={isNonMobileScreens ? 'flex' : 'block'}
             gap="2rem"
             justifyContent="Center"
+            position="relative"
           >
             <Box flexBasis={isNonMobileScreens ? '26%' : undefined}>
-              <UserWidget user={user} />
-              <Box m="2rem 0" />
-              <FriendListWidget userId={userId} />
+              <Box position="sticky" top="7rem">
+                <UserWidget user={user} />
+                <Box m="2rem 0" />
+                <FriendListWidget userId={userId} />
+              </Box>
             </Box>
             <Box
               flexBasis={isNonMobileScreens ? '42%' : undefined}
