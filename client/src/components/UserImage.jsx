@@ -3,7 +3,7 @@ import React from 'react'
 import { Box } from '@mui/material'
 import images from '~/assets'
 
-const UserImage = ({ image, size = '60px' }) => {
+const UserImage = ({ image, size = '45px' }) => {
   return (
     <Box width={size} height={size}>
       <img

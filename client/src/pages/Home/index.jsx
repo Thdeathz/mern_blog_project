@@ -23,9 +23,12 @@ const HomePage = () => {
         display={isNonMobileScreens ? 'flex' : 'block'}
         gap="0.5rem"
         justifyContent="space-between"
+        position="relative"
       >
         <Box flexBasis={isNonMobileScreens ? '26%' : undefined}>
-          <UserWidget user={currentUser} />
+          <Box position="sticky" top="7rem">
+            <UserWidget user={currentUser} />
+          </Box>
         </Box>
         <Box
           flexBasis={isNonMobileScreens ? '42%' : undefined}
@@ -36,9 +39,19 @@ const HomePage = () => {
         </Box>
         {isNonMobileScreens && (
           <Box flexBasis="26%">
-            <AdvertWidget />
-            <Box m="2rem 0"></Box>
-            <FriendListWidget userId={currentUser._id} />
+            <Box
+              position="sticky"
+              top="7rem"
+              display="flex"
+              flexDirection="column"
+              justifyContent="flex-start"
+              gap="2rem"
+              height="max-content"
+              sx={{}}
+            >
+              <AdvertWidget />
+              <FriendListWidget userId={currentUser._id} />
+            </Box>
           </Box>
         )}
       </Box>

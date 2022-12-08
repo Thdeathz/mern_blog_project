@@ -5,7 +5,7 @@ const initialState = {
 }
 
 export const settingReducer = createSlice({
-  name: 'user',
+  name: 'setting',
   initialState,
   reducers: {
     setMode: state => {
