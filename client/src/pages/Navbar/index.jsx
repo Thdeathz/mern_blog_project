@@ -1,17 +1,7 @@
 import React, { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
-import {
-  Box,
-  IconButton,
-  InputBase,
-  Typography,
-  Select,
-  MenuItem,
-  FormControl,
-  useTheme,
-  useMediaQuery
-} from '@mui/material'
+import { Box, IconButton, InputBase, Typography, useTheme, useMediaQuery } from '@mui/material'
 import {
   Search,
   Message,
@@ -24,14 +14,16 @@ import {
 } from '@mui/icons-material'
 import { setMode } from '~/redux/settingSlice'
 import { FlexBetween } from '~/components'
-import { setLogout, selectCurrentUser, useLogoutMutation } from '~/redux/authSlice'
+import { selectCurrentUser } from '~/redux/authSlice'
+import UserMenu from './UserMenu'
+import MessagesMenu from './MessagesMenu'
+import NotificationsMenu from './NotificationsMenu'
 
 const Navbar = () => {
   const [isMobileMenuToggled, SetIsMobileMenuToggled] = useState(false)
   const dispatch = useDispatch()
   const navigate = useNavigate()
-  const [logout] = useLogoutMutation()
-  const user = useSelector(selectCurrentUser)
+  const { firstName, lastName, picturePath, _id: userId } = useSelector(selectCurrentUser)
 
   const isNonMobileScreens = useMediaQuery('(min-width: 1000px)')
 
@@ -41,19 +33,6 @@ const Navbar = () => {
   const background = theme.palette.background.default
   const primaryLight = theme.palette.primary.light
   const alt = theme.palette.background.alt
-
-  const fullname = `${user.firstName} ${user.lastName}`
-
-  const handleLogout = async () => {
-    try {
-      console.log('===> logging out')
-      await logout()
-      dispatch(setLogout())
-      navigate('/login')
-    } catch (error) {
-      console.error(error)
-    }
-  }
 
   return (
     <FlexBetween
@@ -103,39 +82,17 @@ const Navbar = () => {
               <LightMode sx={{ color: dark, fontSize: '25px' }} />
             )}
           </IconButton>
-          <Message sx={{ fontSize: '25px' }} />
-          <Notifications sx={{ fontSize: '25px' }} />
+          <MessagesMenu />
+          <NotificationsMenu />
           <Help sx={{ fontSize: '25px' }} />
-          <FormControl variant="standard" value={fullname}>
-            <Select
-              value={fullname}
-              sx={{
-                backgroundColor: neutralLight,
-                width: '150px',
-                borderRadius: '0.25rem',
-                p: '0.25rem 1rem',
-                '& .MuiSvgIcon-root': {
-                  pr: '0.25rem',
-                  width: '3rem'
-                },
-                '& .MuiSelect-select:focus': {
-                  backgroundColor: neutralLight
-                }
-              }}
-              input={<InputBase />}
-            >
-              <MenuItem value={fullname}>
-                <Typography>{fullname}</Typography>
-              </MenuItem>
-              <MenuItem onClick={handleLogout}>Log Out</MenuItem>
-            </Select>
-          </FormControl>
+          <UserMenu userId={userId} fullname={`${firstName} ${lastName}`} avatar={picturePath} />
         </FlexBetween>
       ) : (
         <IconButton onClick={() => SetIsMobileMenuToggled(!isMobileMenuToggled)}>
           <Menu />
         </IconButton>
       )}
+
       {/* MOBILE NAV */}
       {!isNonMobileScreens && isMobileMenuToggled && (
         <Box
@@ -172,30 +129,7 @@ const Navbar = () => {
             <Message sx={{ fontSize: '25px' }} />
             <Notifications sx={{ fontSize: '25px' }} />
             <Help sx={{ fontSize: '25px' }} />
-            <FormControl variant="standard" value={fullname}>
-              <Select
-                value={fullname}
-                sx={{
-                  backgroundColor: neutralLight,
-                  width: '150px',
-                  borderRadius: '0.25rem',
-                  p: '0.25rem 1rem',
-                  '& .MuiSvgIcon-root': {
-                    pr: '0.25rem',
-                    width: '3rem'
-                  },
-                  '& .MuiSelect-select:focus': {
-                    backgroundColor: neutralLight
-                  }
-                }}
-                input={<InputBase />}
-              >
-                <MenuItem value={fullname}>
-                  <Typography>{fullname}</Typography>
-                </MenuItem>
-                <MenuItem onClick={handleLogout}>Log Out</MenuItem>
-              </Select>
-            </FormControl>
+            <UserMenu userId={userId} fullname={`${firstName} ${lastName}`} avatar={picturePath} />
           </FlexBetween>
         </Box>
       )}

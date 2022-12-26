@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import {
+  Box,
   ButtonBase,
   ClickAwayListener,
   Divider,
@@ -59,11 +60,13 @@ const MyPostWidget = ({ picturePath }) => {
           alignItems: 'center'
         }}
       >
-        <ClickAwayListener onClickAway={() => setIsOpen(false)}>
-          <WidgetWrapper>
-            <CreatePostModal setIsOpen={setIsOpen} />
-          </WidgetWrapper>
-        </ClickAwayListener>
+        <WidgetWrapper>
+          <ClickAwayListener onClickAway={() => setIsOpen(false)}>
+            <Box>
+              <CreatePostModal setIsOpen={setIsOpen} />
+            </Box>
+          </ClickAwayListener>
+        </WidgetWrapper>
       </Modal>
 
       <Divider sx={{ margin: '1.25rem 0' }} />
