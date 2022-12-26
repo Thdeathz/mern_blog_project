@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react'
 import { Box, ClickAwayListener, Grow, IconButton, Paper, Popper } from '@mui/material'
 
 // eslint-disable-next-line react/prop-types
-const IconPopover = ({ icon, children }) => {
+const IconPopover = ({ icon, children, style }) => {
   const [emojiOpen, setEmojiOpen] = useState(false)
   const emojiAnchorRef = useRef(null)
 
@@ -21,6 +21,7 @@ const IconPopover = ({ icon, children }) => {
         aria-controls={emojiOpen ? 'emoji-popover' : undefined}
         aria-expanded={emojiOpen ? 'true' : undefined}
         aria-haspopup="true"
+        sx={style}
         onClick={() => setEmojiOpen(!emojiOpen)}
       >
         {icon}
